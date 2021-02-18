@@ -11,18 +11,61 @@ Globals:
     Timeout: 3
 
 Resources:
+  StudentTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: students
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+
   HelloWorldFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
       CodeUri: hello_world/
       Handler: app.app
       Runtime: python3.7
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName:
+              !Ref StudentTable
       Events:
-        HelloWorld:
-          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+        # HelloWorld:
+        #   Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+        #   Properties:
+        #     Path: /hello
+        #     Method: get
+        ListStudents:
+          Type: Api
           Properties:
-            Path: /hello
+            Path: /students
             Method: get
+        PutStudent:
+          Type: Api
+          Properties:
+            Path: /students
+            Method: post
+        GetStudent:
+          Type: Api
+          Properties:
+            Path: /students/{id}/
+            Method: get
+        PatchStudent:
+          Type: Api
+          Properties:
+            Path: /students/{id}/
+            Method: patch
+        DeleteStudent:
+          Type: Api
+          Properties:
+            Path: /students/{id}/
+            Method: delete
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
